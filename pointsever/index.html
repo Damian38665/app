@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>积分系统</title>
+    <title>登录系统</title>
     <style>
         /* 基础样式 */
         body {
@@ -42,7 +42,7 @@
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
         }
 
         input {
@@ -58,7 +58,6 @@
         /* 按钮样式 */
         .btn {
             position: relative;
-            overflow: hidden;
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -67,27 +66,15 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .btn:hover {
             background: #2980b9;
         }
 
-        .click-effect {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: clickEffect 0.6s ease-out;
-            pointer-events: none;
-        }
-
-        @keyframes clickEffect {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
+        .btn:active {
+            transform: scale(0.98);
         }
 
         /* 加载动画 */
@@ -97,39 +84,18 @@
             left: 50%;
             transform: translate(-50%, -50%);
             display: none;
-        }
-
-        .loader-dot {
-            width: 10px;
-            height: 10px;
-            background: #3498db;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
             border-radius: 50%;
-            position: absolute;
-            animation: spin 1.2s ease-in-out infinite;
-        }
-
-        .loader-dot:nth-child(1) {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            animation-delay: 0s;
-        }
-
-        .loader-dot:nth-child(2) {
-            top: 25%;
-            right: 15%;
-            animation-delay: -0.4s;
-        }
-
-        .loader-dot:nth-child(3) {
-            top: 75%;
-            right: 15%;
-            animation-delay: -0.8s;
+            animation: spin 1s linear infinite;
+            z-index: 1001;
         }
 
         @keyframes spin {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(0.5); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* 自定义弹窗 */
@@ -138,24 +104,61 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             text-align: center;
             display: none;
-            z-index: 1000;
+            z-index: 1003;
             min-width: 250px;
+            backdrop-filter: blur(10px);
         }
+
+        .alert-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .success .alert-icon { color: #2ecc71; }
+        .error .alert-icon { color: #e74c3c; }
 
         .custom-alert button {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 10px 30px;
             background: #3498db;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
+        }
+
+        /* 人机验证弹窗 */
+        .captcha-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            width: 300px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1002;
+            backdrop-filter: blur(10px);
+        }
+
+        .captcha-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .captcha-checkbox input {
+            width: auto;
+            margin: 0;
         }
 
         /* 主界面 */
@@ -164,6 +167,12 @@
             text-align: center;
             padding: 20px;
             width: 100%;
+        }
+
+        .welcome {
+            font-size: 20px;
+            color: #3498db;
+            margin-bottom: 20px;
         }
 
         .points {
@@ -179,44 +188,51 @@
             font-size: 18px;
         }
 
-        /* 链接样式 */
-        a {
-            color: #3498db;
-            text-decoration: none;
+        .notification {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            display: inline-block;
-            padding: 5px 0;
-            position: relative;
         }
 
-        a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
+        /* 遮罩层 */
+        .overlay {
+            position: fixed;
+            top: 0;
             left: 0;
-            background: #3498db;
-            transition: width 0.3s ease;
-        }
-
-        a:hover::after {
             width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            z-index: 999;
         }
     </style>
 </head>
 <body>
     <!-- 加载动画 -->
-    <div class="loader" id="loader">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-    </div>
+    <div class="loader" id="loader"></div>
+    
+    <!-- 遮罩层 -->
+    <div class="overlay" id="overlay"></div>
 
     <!-- 自定义弹窗 -->
     <div class="custom-alert" id="customAlert">
+        <div class="alert-icon">✓</div>
         <div id="alertMessage"></div>
-        <button class="btn" onclick="closeAlert()">确定</button>
+        <button onclick="closeAlert()">确定</button>
+    </div>
+
+    <!-- 人机验证弹窗 -->
+    <div class="captcha-modal" id="captchaModal">
+        <h2>人机验证</h2>
+        <div class="captcha-checkbox">
+            <input type="checkbox" id="captchaCheckbox">
+            <label for="captchaCheckbox">我是人类</label>
+        </div>
+        <button class="btn" onclick="verifyCaptcha()">继续</button>
     </div>
 
     <!-- 登录注册容器 -->
@@ -227,7 +243,7 @@
                 <h2>欢迎登录</h2>
                 <input type="text" id="loginUser" placeholder="用户名">
                 <input type="password" id="loginPass" placeholder="密码">
-                <button class="btn" onclick="login(event)">登录</button>
+                <button class="btn" onclick="showCaptcha('login')">登录</button>
                 <p>没有账号？ <a onclick="switchForm()">立即注册</a></p>
             </div>
 
@@ -236,7 +252,7 @@
                 <h2>用户注册</h2>
                 <input type="text" id="regUser" placeholder="用户名">
                 <input type="password" id="regPass" placeholder="密码">
-                <button class="btn" onclick="register(event)">注册</button>
+                <button class="btn" onclick="showCaptcha('register')">注册</button>
                 <p>已有账号？ <a onclick="switchForm()">立即登录</a></p>
             </div>
         </div>
@@ -244,9 +260,14 @@
 
     <!-- 主界面 -->
     <div id="main">
+        <div class="welcome">欢迎，<span id="username"></span></div>
+        <div class="notification" onclick="showNotification()">
+            <span>📢 系统通知</span>
+        </div>
         <h2>每日签到</h2>
         <div class="points">当前积分：<span id="points">0</span></div>
         <button class="btn main-btn" onclick="signIn(event)" id="signBtn">点击签到</button>
+        <button class="btn main-btn" onclick="location.href='profile.html'">个人中心</button>
         <button class="btn main-btn" onclick="location.href='other.html'">其他功能</button>
     </div>
 
@@ -254,15 +275,35 @@
         const GITEE_USER = 'damian2021';
         const ACCESS_TOKEN = 'b5a96c2df3774e1a8ded0ff0cc54cdfa';
         const REPO = 'pointsever';
+        let currentUser = '';
+        let currentAction = ''; // 当前操作：login 或 register
+        let isNotificationShown = false; // 是否已显示通知
 
         // 显示自定义弹窗
-        function showAlert(message) {
+        function showAlert(message, isSuccess = true) {
+            const alert = document.getElementById('customAlert');
+            alert.classList.remove('success', 'error');
+            alert.classList.add(isSuccess ? 'success' : 'error');
+            alert.querySelector('.alert-icon').textContent = isSuccess ? '✓' : '✕';
             document.getElementById('alertMessage').textContent = message;
-            document.getElementById('customAlert').style.display = 'block';
+            alert.style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
         }
 
         function closeAlert() {
             document.getElementById('customAlert').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // 显示/隐藏加载动画
+        function showLoader() {
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
         }
 
         // 切换表单
@@ -270,35 +311,34 @@
             document.getElementById('formContainer').classList.toggle('switch-form');
         }
 
-        // 显示/隐藏加载动画
-        function showLoader() {
-            document.getElementById('loader').style.display = 'block';
+        // 显示人机验证
+        function showCaptcha(action) {
+            currentAction = action;
+            document.getElementById('captchaModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
         }
 
-        function hideLoader() {
-            document.getElementById('loader').style.display = 'none';
+        // 验证人机验证
+        function verifyCaptcha() {
+            if (!document.getElementById('captchaCheckbox').checked) {
+                showAlert('请确认您是人类', false);
+                return;
+            }
+            closeCaptcha();
+            if (currentAction === 'login') {
+                login();
+            } else {
+                register();
+            }
         }
 
-        // 按钮点击效果
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const rect = this.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const effect = document.createElement('div');
-                effect.className = 'click-effect';
-                effect.style.left = x + 'px';
-                effect.style.top = y + 'px';
-                
-                this.appendChild(effect);
-                setTimeout(() => effect.remove(), 600);
-            });
-        });
+        function closeCaptcha() {
+            document.getElementById('captchaModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
 
         // 登录功能
-        async function login(e) {
-            e.preventDefault();
+        async function login() {
             showLoader();
             try {
                 const loginData = await getFileContent('login.txt');
@@ -306,19 +346,24 @@
                 const pass = document.getElementById('loginPass').value.trim();
 
                 if (!user || !pass) {
-                    showAlert('用户名和密码不能为空');
+                    showAlert('用户名和密码不能为空', false);
                     return;
                 }
 
                 if (loginData.includes(`${user}:${pass}`)) {
+                    currentUser = user;
                     showMain();
                     await loadPoints();
+                    if (!isNotificationShown) {
+                        setTimeout(() => showNotification(), 1000); // 延迟1秒显示通知
+                        isNotificationShown = true;
+                    }
                     showAlert('登录成功');
                 } else {
-                    showAlert('用户名或密码错误');
+                    showAlert('用户名或密码错误', false);
                 }
             } catch (error) {
-                showAlert('登录失败，请检查网络连接');
+                showAlert('登录失败，请检查网络连接', false);
                 console.error('登录错误:', error);
             } finally {
                 hideLoader();
@@ -326,20 +371,19 @@
         }
 
         // 注册功能
-        async function register(e) {
-            e.preventDefault();
+        async function register() {
             showLoader();
             try {
                 const user = document.getElementById('regUser').value.trim();
                 const pass = document.getElementById('regPass').value.trim();
 
                 if (!user || !pass) {
-                    showAlert('用户名和密码不能为空');
+                    showAlert('用户名和密码不能为空', false);
                     return;
                 }
 
                 if (user.includes(':') || pass.includes(':')) {
-                    showAlert('用户名或密码不能包含冒号');
+                    showAlert('用户名或密码不能包含冒号', false);
                     return;
                 }
 
@@ -347,7 +391,7 @@
                 const users = loginData.split('\n').filter(line => line);
 
                 if (users.some(line => line.startsWith(`${user}:`))) {
-                    showAlert('用户名已存在');
+                    showAlert('用户名已存在', false);
                     return;
                 }
 
@@ -356,7 +400,7 @@
                 showAlert('注册成功');
                 switchForm();
             } catch (error) {
-                showAlert('注册失败，请检查网络连接');
+                showAlert('注册失败，请检查网络连接', false);
                 console.error('注册错误:', error);
             } finally {
                 hideLoader();
@@ -368,27 +412,26 @@
             e.preventDefault();
             showLoader();
             try {
-                const user = document.getElementById('loginUser').value.trim();
                 const today = new Date().toISOString().split('T')[0];
                 const pointData = await getFileContent('point.txt').catch(() => '');
 
-                if (!user) {
-                    showAlert('请先登录');
+                if (!currentUser) {
+                    showAlert('请先登录', false);
                     return;
                 }
 
-                if (pointData.includes(`${user}:${today}`)) {
-                    showAlert('今日已签到');
+                if (pointData.includes(`${currentUser}:${today}`)) {
+                    showAlert('今日已签到', false);
                     return;
                 }
 
-                const newContent = pointData + (pointData ? '\n' : '') + `${user}:${today}`;
+                const newContent = pointData + (pointData ? '\n' : '') + `${currentUser}:${today}`;
                 await updateFile('point.txt', newContent);
                 await loadPoints();
                 document.getElementById('signBtn').disabled = true;
                 showAlert('签到成功，积分+2');
             } catch (error) {
-                showAlert('签到失败，请检查网络连接');
+                showAlert('签到失败，请检查网络连接', false);
                 console.error('签到错误:', error);
             } finally {
                 hideLoader();
@@ -398,9 +441,8 @@
         // 加载积分
         async function loadPoints() {
             try {
-                const user = document.getElementById('loginUser').value.trim();
                 const pointData = await getFileContent('point.txt').catch(() => '');
-                const count = pointData.split('\n').filter(line => line.startsWith(`${user}:`)).length;
+                const count = pointData.split('\n').filter(line => line.startsWith(`${currentUser}:`)).length;
                 document.getElementById('points').textContent = count * 2;
             } catch (error) {
                 console.error('加载积分错误:', error);
@@ -411,6 +453,7 @@
         function showMain() {
             document.getElementById('authContainer').style.display = 'none';
             document.getElementById('main').style.display = 'block';
+            document.getElementById('username').textContent = currentUser;
         }
 
         // 文件操作
@@ -458,6 +501,31 @@
             if (!response.ok) throw new Error('文件更新失败');
             return response.json();
         }
+
+        // 系统通知
+        async function showNotification() {
+            try {
+                const message = await getFileContent('message.txt');
+                showAlert(`系统通知：\n${message}`);
+            } catch (error) {
+                showAlert('获取通知失败', false);
+                console.error('通知错误:', error);
+            }
+        }
+
+        // 点击遮罩层关闭
+        document.getElementById('overlay').addEventListener('click', () => {
+            closeAlert();
+            closeCaptcha();
+        });
+
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAlert();
+                closeCaptcha();
+            }
+        });
     </script>
 </body>
 </html>

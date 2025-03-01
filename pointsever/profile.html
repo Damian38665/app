@@ -20,6 +20,12 @@
         .container {
             width: 100%;
             max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 表单样式 */
+        .form-box {
             padding: 30px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
@@ -27,7 +33,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* 输入框样式 */
         input {
             width: 100%;
             padding: 12px;
@@ -36,17 +41,11 @@
             border-radius: 8px;
             box-sizing: border-box;
             transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
         /* 按钮样式 */
         .btn {
+            position: relative;
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -55,24 +54,38 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .btn:hover {
-            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn:active {
-            transform: scale(0.98);
+            transform: translateY(0);
         }
 
-        .btn-danger {
-            background: #e74c3c;
+        /* 加载动画 */
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1001;
         }
 
-        .btn-danger:hover {
-            background: #c0392b;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* 自定义弹窗 */
@@ -87,7 +100,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             text-align: center;
             display: none;
-            z-index: 1001;
+            z-index: 1000;
             min-width: 250px;
             backdrop-filter: blur(10px);
         }
@@ -110,22 +123,6 @@
             cursor: pointer;
         }
 
-        /* 修改弹窗 */
-        .edit-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            width: 300px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 1002;
-            backdrop-filter: blur(10px);
-        }
-
         /* 遮罩层 */
         .overlay {
             position: fixed;
@@ -136,11 +133,14 @@
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(5px);
             display: none;
-            z-index: 1000;
+            z-index: 999;
         }
     </style>
 </head>
 <body>
+    <!-- 加载动画 -->
+    <div class="loader" id="loader"></div>
+    
     <!-- 遮罩层 -->
     <div class="overlay" id="overlay"></div>
 
@@ -151,31 +151,15 @@
         <button onclick="closeAlert()">确定</button>
     </div>
 
-    <!-- 修改用户名弹窗 -->
-    <div class="edit-modal" id="usernameModal">
-        <h2>修改用户名</h2>
-        <input type="text" id="newUsername" placeholder="新用户名">
-        <button class="btn" onclick="submitUsernameChange()">提交</button>
-        <button class="btn" onclick="closeUsernameModal()" style="background: #666; margin-top: 10px;">取消</button>
-    </div>
-
-    <!-- 修改密码弹窗 -->
-    <div class="edit-modal" id="passwordModal">
-        <h2>修改密码</h2>
-        <input type="password" id="oldPassword" placeholder="当前密码">
-        <input type="password" id="newPassword" placeholder="新密码">
-        <input type="password" id="confirmPassword" placeholder="确认新密码">
-        <button class="btn" onclick="submitPasswordChange()">提交</button>
-        <button class="btn" onclick="closePasswordModal()" style="background: #666; margin-top: 10px;">取消</button>
-    </div>
-
-    <!-- 主容器 -->
-    <div class="container">
-        <h2>个人中心</h2>
-        <button class="btn" onclick="showUsernameModal()">修改用户名</button>
-        <button class="btn" onclick="showPasswordModal()">修改密码</button>
-        <button class="btn btn-danger" onclick="deleteAccount()">永久注销</button>
-        <button class="btn" onclick="goBack()">返回</button>
+    <!-- 主界面 -->
+    <div class="container" id="main">
+        <div class="form-box">
+            <h2>个人中心</h2>
+            <div id="profileContent">
+                <!-- 动态内容 -->
+            </div>
+            <button class="btn" onclick="location.href='index.html'">返回</button>
+        </div>
     </div>
 
     <script>
@@ -200,114 +184,118 @@
             document.getElementById('overlay').style.display = 'none';
         }
 
-        // 显示修改用户名弹窗
-        function showUsernameModal() {
-            document.getElementById('usernameModal').style.display = 'block';
+        // 显示/隐藏加载动画
+        function showLoader() {
+            document.getElementById('loader').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
         }
 
-        function closeUsernameModal() {
-            document.getElementById('usernameModal').style.display = 'none';
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
         }
 
-        // 显示修改密码弹窗
-        function showPasswordModal() {
-            document.getElementById('passwordModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
-
-        function closePasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-
-        // 提交用户名修改
-        async function submitUsernameChange() {
-            const newUsername = document.getElementById('newUsername').value.trim();
-
-            if (!newUsername) {
-                showAlert('请输入新用户名', false);
-                return;
-            }
-
-            if (newUsername.includes(':')) {
-                showAlert('用户名不能包含冒号', false);
-                return;
-            }
-
+        // 检查登录状态
+        async function checkLogin() {
+            showLoader();
             try {
                 const loginData = await getFileContent('login.txt');
-                const userData = loginData.split('\n').find(line => line.startsWith(`${currentUser}:`));
-                if (!userData) {
-                    showAlert('用户信息获取失败', false);
+                const urlParams = new URLSearchParams(window.location.search);
+                const user = urlParams.get('user');
+                const pass = urlParams.get('pass');
+
+                if (!user || !pass) {
+                    showAlert('您还没有登录', false);
+                    setTimeout(() => location.href = 'index.html', 2000);
+                    return;
+                }
+
+                if (loginData.includes(`${user}:${pass}`)) {
+                    currentUser = user;
+                    showProfile();
+                } else {
+                    showAlert('登录信息无效', false);
+                    setTimeout(() => location.href = 'index.html', 2000);
+                }
+            } catch (error) {
+                showAlert('获取登录信息失败', false);
+                console.error('登录检查错误:', error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // 显示个人中心内容
+        function showProfile() {
+            const profileContent = `
+                <input type="text" id="newUsername" placeholder="新用户名" value="${currentUser}">
+                <button class="btn" onclick="changeUsername()">修改用户名</button>
+                <button class="btn" onclick="showPasswordModal()">修改密码</button>
+                <button class="btn" onclick="deleteAccount()" style="background: #e74c3c;">永久注销</button>
+            `;
+            document.getElementById('profileContent').innerHTML = profileContent;
+        }
+
+        // 修改用户名
+        async function changeUsername() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            if (!newUsername) {
+                alert('用户名不能为空');
+                return;
+            }
+
+            showLoader();
+            try {
+                const loginData = await getFileContent('login.txt');
+                const users = loginData.split('\n').filter(line => line);
+
+                if (users.some(line => line.startsWith(`${newUsername}:`))) {
+                    alert('用户名已存在');
                     return;
                 }
 
                 const newContent = loginData.replace(
-                    `${currentUser}:${userData.split(':')[1]}`,
-                    `${newUsername}:${userData.split(':')[1]}`
+                    `${currentUser}:`,
+                    `${newUsername}:`
                 );
 
                 await updateFile('login.txt', newContent);
                 currentUser = newUsername;
-                showAlert('用户名修改成功');
-                closeUsernameModal();
+                alert('用户名修改成功');
+                showProfile();
             } catch (error) {
-                showAlert('用户名修改失败', false);
+                alert('用户名修改失败');
                 console.error('修改用户名错误:', error);
+            } finally {
+                hideLoader();
             }
         }
 
-        // 提交密码修改
-        async function submitPasswordChange() {
-            const oldPass = document.getElementById('oldPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirmPass = document.getElementById('confirmPassword').value;
-
-            if (!oldPass || !newPass || !confirmPass) {
-                showAlert('请填写所有字段', false);
-                return;
-            }
-
-            if (newPass !== confirmPass) {
-                showAlert('两次输入的密码不一致', false);
-                return;
-            }
-
+        // 修改密码
+        async function changePassword(oldPass, newPass) {
+            showLoader();
             try {
                 const loginData = await getFileContent('login.txt');
-                if (!loginData.includes(`${currentUser}:${oldPass}`)) {
-                    showAlert('当前密码错误', false);
-                    return;
-                }
-
                 const newContent = loginData.replace(
                     `${currentUser}:${oldPass}`,
                     `${currentUser}:${newPass}`
                 );
 
                 await updateFile('login.txt', newContent);
-                showAlert('密码修改成功');
-                closePasswordModal();
+                alert('密码修改成功');
             } catch (error) {
-                showAlert('密码修改失败', false);
+                alert('密码修改失败');
                 console.error('修改密码错误:', error);
+            } finally {
+                hideLoader();
             }
         }
 
-        // 永久注销账户
+        // 永久注销
         async function deleteAccount() {
-            showAlert('确定要永久注销账户吗？此操作不可撤销！', false);
-            document.getElementById('customAlert').innerHTML = `
-                <div class="alert-icon">⚠️</div>
-                <div>确定要永久注销账户吗？此操作不可撤销！</div>
-                <button onclick="confirmDelete()" style="background: #e74c3c;">确认注销</button>
-                <button onclick="closeAlert()">取消</button>
-            `;
-        }
+            if (!confirm('确定要永久注销账户吗？此操作不可撤销！')) return;
 
-        async function confirmDelete() {
+            showLoader();
             try {
                 // 删除登录信息
                 const loginData = await getFileContent('login.txt');
@@ -323,17 +311,14 @@
                     .join('\n');
                 await updateFile('point.txt', newPointData);
 
-                showAlert('账户已永久注销');
-                setTimeout(() => location.href = 'index.html', 1500);
+                alert('账户已永久注销');
+                location.href = 'index.html';
             } catch (error) {
-                showAlert('注销失败，请稍后重试', false);
+                alert('注销失败，请稍后重试');
                 console.error('注销错误:', error);
+            } finally {
+                hideLoader();
             }
-        }
-
-        // 返回登录页面
-        function goBack() {
-            location.href = 'index.html';
         }
 
         // 文件操作
@@ -382,49 +367,8 @@
             return response.json();
         }
 
-        // 初始化检查登录状态
-        async function checkLogin() {
-            try {
-                const params = new URLSearchParams(location.search);
-                const user = params.get('user');
-                if (!user) {
-                    showAlert('您还没有登录', false);
-                    setTimeout(() => location.href = 'index.html', 1500);
-                    return;
-                }
-
-                const loginData = await getFileContent('login.txt');
-                if (!loginData.includes(`${user}:`)) {
-                    showAlert('登录信息无效', false);
-                    setTimeout(() => location.href = 'index.html', 1500);
-                    return;
-                }
-
-                currentUser = user;
-            } catch (error) {
-                showAlert('获取登录信息失败', false);
-                console.error('登录检查错误:', error);
-            }
-        }
-
-        // 页面加载时检查登录状态
+        // 初始化
         checkLogin();
-
-        // 点击遮罩层关闭
-        document.getElementById('overlay').addEventListener('click', () => {
-            closeAlert();
-            closeUsernameModal();
-            closePasswordModal();
-        });
-
-        // ESC键关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAlert();
-                closeUsernameModal();
-                closePasswordModal();
-            }
-        });
     </script>
 </body>
 </html>

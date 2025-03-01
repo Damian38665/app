@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录系统</title>
+    <title>积分系统</title>
     <style>
         /* 基础样式 */
         body {
@@ -53,17 +53,11 @@
             border-radius: 8px;
             box-sizing: border-box;
             transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
         /* 按钮样式 */
         .btn {
+            position: relative;
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -72,16 +66,17 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .btn:hover {
-            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn:active {
-            transform: scale(0.98);
+            transform: translateY(0);
         }
 
         /* 加载动画 */
@@ -274,7 +269,7 @@
         <h2>每日签到</h2>
         <div class="points">当前积分：<span id="points">0</span></div>
         <button class="btn main-btn" onclick="signIn(event)" id="signBtn">点击签到</button>
-        <button class="btn main-btn" onclick="goToProfile()">个人中心</button>
+        <button class="btn main-btn" onclick="location.href='profile.html'">个人中心</button>
         <button class="btn main-btn" onclick="location.href='other.html'">其他功能</button>
     </div>
 
@@ -518,15 +513,6 @@
                 showAlert('获取通知失败', false);
                 console.error('通知错误:', error);
             }
-        }
-
-        // 跳转到个人中心
-        function goToProfile() {
-            if (!currentUser) {
-                showAlert('请先登录', false);
-                return;
-            }
-            location.href = `profile.html?user=${encodeURIComponent(currentUser)}`;
         }
 
         // 点击遮罩层关闭

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>point app download数据库</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading img {
+            width: 50px;
+            height: 50px;
+        }
+        .download-link {
+            color: #0078d7;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h1>point app download数据库</h1>
+
+<table id="windowsTable">
+    <thead>
+        <tr>
+            <th>版本名称</th>
+            <th>版本号</th>
+            <th>发布日期</th>
+            <th>下载</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- 数据将通过JavaScript动态加载 -->
+    </tbody>
+</table>
+
+<div class="loading" id="loading">
+    <img src="https://i.gifer.com/ZZ5H.gif" alt="加载中...">
+    <p>加载中，请稍候...</p>
+</div>
+
+<script>
+    // Gitee API 配置
+    const giteeUsername = "damian2021";
+    const giteeToken = "b5a96c2df3774e1a8ded0ff0cc54cdfa";
+    const giteeRepo = "sever666";
+    const filePath = "pointsever.txt"; // 仓库中的文件路径
+
+    // 显示加载动画
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+    }
+
+    // 隐藏加载动画
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    // 从Gitee仓库获取1.txt文件内容
+    async function fetchGiteeFileContent() {
+        const apiUrl = `https://gitee.com/api/v5/repos/${giteeUsername}/${giteeRepo}/contents/${filePath}`;
+        const headers = {
+            Authorization: `token ${giteeToken}`
+        };
+
+        try {
+            const response = await fetch(apiUrl, { headers });
+            const data = await response.json();
+            if (data.content) {
+                // Base64解码文件内容
+                const fileContent = decodeURIComponent(escape(atob(data.content)));
+                return fileContent;
+            } else {
+                throw new Error("无法获取文件内容");
+            }
+        } catch (error) {
+            console.error("请求失败：", error);
+            return null;
+        }
+    }
+
+    // 解析文件内容并填充表格
+    async function loadData() {
+        showLoading();
+        const tableBody = document.querySelector('#windowsTable tbody');
+
+        // 获取文件内容
+        const fileContent = await fetchGiteeFileContent();
+        if (!fileContent) {
+            hideLoading();
+            alert("无法加载数据，请检查网络或文件是否存在。");
+            return;
+        }
+
+        // 清空表格内容
+        tableBody.innerHTML = '';
+
+        // 解析文件内容（假设文件内容为CSV格式）
+        const rows = fileContent.split('\n');
+        rows.forEach(row => {
+            const [name, version, releaseDate, downloadUrl] = row.split(',');
+            if (name && version && releaseDate && downloadUrl) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${name}</td>
+                    <td>${version}</td>
+                    <td>${releaseDate}</td>
+                    <td><button class="download-link" onclick="window.open('${downloadUrl}')">下载</button></td>
+                `;
+                tableBody.appendChild(tr);
+            }
+        });
+
+        hideLoading();
+    }
+
+    // 保存数据到Gitee仓库
+    async function saveDataToGitee(content) {
+        const apiUrl = `https://gitee.com/api/v5/repos/${giteeUsername}/${giteeRepo}/contents/${filePath}`;
+        const headers = {
+            Authorization: `token ${giteeToken}`,
+            "Content-Type": "application/json"
+        };
+
+        // 获取文件的SHA值（用于更新文件）
+        const fileInfo = await fetch(apiUrl, { headers });
+        const fileData = await fileInfo.json();
+        const sha = fileData.sha;
+
+        // 更新文件内容
+        const body = {
+            content: btoa(unescape(encodeURIComponent(content))), // Base64编码
+            message: "更新文件内容",
+            sha: sha
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "PUT",
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+            const result = await response.json();
+            if (result.content) {
+                alert("数据保存成功！");
+            } else {
+                throw new Error("保存失败");
+            }
+        } catch (error) {
+            console.error("保存失败：", error);
+            alert("保存失败，请检查网络或权限。");
+        }
+    }
+
+    // 页面加载完成后加载数据
+    window.onload = loadData;
+</script>
+
+</body>
+</html>

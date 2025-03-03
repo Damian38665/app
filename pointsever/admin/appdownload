@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>app发布数据库 - 后台管理</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading img {
+            width: 50px;
+            height: 50px;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .btn-action {
+            margin: 2px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>app发布数据库 - 后台管理</h1>
+
+    <!-- 添加记录表单 -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            添加新记录
+        </div>
+        <div class="card-body">
+            <form id="addRecordForm">
+                <div class="row">
+                    <div class="col-md-3 form-group">
+                        <input type="text" class="form-control" placeholder="版本名称" id="name" required>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <input type="text" class="form-control" placeholder="版本号" id="version" required>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <input type="date" class="form-control" placeholder="发布日期" id="releaseDate" required>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <input type="url" class="form-control" placeholder="下载链接" id="downloadUrl" required>
+                    </div>
+                    <div class="col-md-1 form-group">
+                        <button type="submit" class="btn btn-success w-100">添加</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 数据表格 -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            版本记录
+        </div>
+        <div class="card-body">
+            <div class="loading" id="loading">
+                <img src="https://i.gifer.com/ZZ5H.gif" alt="加载中...">
+                <p>加载中，请稍候...</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="windowsTable">
+                    <thead>
+                        <tr>
+                            <th>版本名称</th>
+                            <th>版本号</th>
+                            <th>发布日期</th>
+                            <th>下载链接</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 Bootstrap JS -->
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Gitee API 配置
+    const giteeUsername = "damian2021";
+    const giteeToken = "b5a96c2df3774e1a8ded0ff0cc54cdfa";
+    const giteeRepo = "sever666";
+    const filePath = "pointapp.txt"; // 仓库中的文件路径
+
+    // 显示加载动画
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+    }
+
+    // 隐藏加载动画
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    // 从Gitee仓库获取1.txt文件内容
+    async function fetchGiteeFileContent() {
+        const apiUrl = `https://gitee.com/api/v5/repos/${giteeUsername}/${giteeRepo}/contents/${filePath}`;
+        const headers = {
+            Authorization: `token ${giteeToken}`
+        };
+
+        try {
+            const response = await fetch(apiUrl, { headers });
+            const data = await response.json();
+            if (data.content) {
+                // Base64解码文件内容
+                const fileContent = decodeURIComponent(escape(atob(data.content)));
+                return fileContent;
+            } else {
+                throw new Error("无法获取文件内容");
+            }
+        } catch (error) {
+            console.error("请求失败：", error);
+            return null;
+        }
+    }
+
+    // 解析文件内容并填充表格
+    async function loadData() {
+        showLoading();
+        const tableBody = document.querySelector('#windowsTable tbody');
+
+        // 获取文件内容
+        const fileContent = await fetchGiteeFileContent();
+        if (!fileContent) {
+            hideLoading();
+            alert("无法加载数据，请检查网络或文件是否存在。");
+            return;
+        }
+
+        // 清空表格内容
+        tableBody.innerHTML = '';
+
+        // 解析文件内容（假设文件内容为CSV格式）
+        const rows = fileContent.split('\n');
+        rows.forEach((row, index) => {
+            const [name, version, releaseDate, downloadUrl] = row.split(',');
+            if (name && version && releaseDate && downloadUrl) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${name}</td>
+                    <td>${version}</td>
+                    <td>${releaseDate}</td>
+                    <td><a href="${downloadUrl}" target="_blank">${downloadUrl}</a></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm btn-action" onclick="editRecord(${index})">编辑</button>
+                        <button class="btn btn-danger btn-sm btn-action" onclick="deleteRecord(${index})">删除</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            }
+        });
+
+        hideLoading();
+    }
+
+    // 保存数据到Gitee仓库
+    async function saveDataToGitee(content) {
+        const apiUrl = `https://gitee.com/api/v5/repos/${giteeUsername}/${giteeRepo}/contents/${filePath}`;
+        const headers = {
+            Authorization: `token ${giteeToken}`,
+            "Content-Type": "application/json"
+        };
+
+        // 获取文件的SHA值（用于更新文件）
+        const fileInfo = await fetch(apiUrl, { headers });
+        const fileData = await fileInfo.json();
+        const sha = fileData.sha;
+
+        // 更新文件内容
+        const body = {
+            content: btoa(unescape(encodeURIComponent(content))), // Base64编码
+            message: "更新文件内容",
+            sha: sha
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "PUT",
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+            const result = await response.json();
+            if (result.content) {
+                alert("数据保存成功！");
+                loadData(); // 重新加载数据
+            } else {
+                throw new Error("保存失败");
+            }
+        } catch (error) {
+            console.error("保存失败：", error);
+            alert("保存失败，请检查网络或权限。");
+        }
+    }
+
+    // 添加记录
+    document.getElementById('addRecordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const version = document.getElementById('version').value;
+        const releaseDate = document.getElementById('releaseDate').value;
+        const downloadUrl = document.getElementById('downloadUrl').value;
+
+        // 获取当前文件内容
+        const fileContent = await fetchGiteeFileContent();
+        const newContent = fileContent + `\n${name},${version},${releaseDate},${downloadUrl}`;
+
+        // 保存新内容
+        await saveDataToGitee(newContent);
+
+        // 清空表单
+        document.getElementById('addRecordForm').reset();
+    });
+
+    // 编辑记录
+    async function editRecord(index) {
+        // 获取当前文件内容
+        const fileContent = await fetchGiteeFileContent();
+        const rows = fileContent.split('\n');
+        const [name, version, releaseDate, downloadUrl] = rows[index].split(',');
+
+        // 填充表单
+        document.getElementById('name').value = name;
+        document.getElementById('version').value = version;
+        document.getElementById('releaseDate').value = releaseDate;
+        document.getElementById('downloadUrl').value = downloadUrl;
+
+        // 删除旧记录
+        await deleteRecord(index);
+    }
+
+    // 删除记录
+    async function deleteRecord(index) {
+        const fileContent = await fetchGiteeFileContent();
+        const rows = fileContent.split('\n');
+        rows.splice(index, 1); // 删除指定行
+        await saveDataToGitee(rows.join('\n'));
+    }
+
+    // 页面加载完成后加载数据
+    window.onload = loadData;
+</script>
+</body>
+</html>

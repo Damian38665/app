@@ -3,35 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>point app download数据库</title>
+    <title>pointapp版本数据库</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 Font Awesome 图标 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
+            background-color: #f8f9fa;
             padding: 20px;
         }
         h1 {
             text-align: center;
+            margin-bottom: 30px;
             color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f8f8;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
         }
         .loading {
             display: none;
@@ -42,42 +27,72 @@
             width: 50px;
             height: 50px;
         }
-        .download-link {
-            color: #0078d7;
-            cursor: pointer;
-            text-decoration: underline;
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            border-radius: 20px 0 0 20px;
+        }
+        .search-container button {
+            border-radius: 0 20px 20px 0;
         }
     </style>
 </head>
 <body>
 
-<h1>point app download数据库</h1>
+<div class="container">
+    <h1>pointapp下载</h1>
 
-<table id="windowsTable">
-    <thead>
-        <tr>
-            <th>版本名称</th>
-            <th>版本号</th>
-            <th>发布日期</th>
-            <th>下载</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- 数据将通过JavaScript动态加载 -->
-    </tbody>
-</table>
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <div class="input-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="搜索版本名称或版本号">
+            <button class="btn btn-primary" type="button" id="searchButton">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
 
-<div class="loading" id="loading">
-    <img src="https://i.gifer.com/ZZ5H.gif" alt="加载中...">
-    <p>加载中，请稍候...</p>
+    <!-- 数据表格 -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            版本记录
+        </div>
+        <div class="card-body">
+            <div class="loading" id="loading">
+                <img src="https://i.gifer.com/ZZ5H.gif" alt="加载中...">
+                <p>加载中，请稍候...</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="windowsTable">
+                    <thead>
+                        <tr>
+                            <th>版本名称</th>
+                            <th>版本号</th>
+                            <th>发布日期</th>
+                            <th>下载链接</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- 引入 Bootstrap JS -->
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
     // Gitee API 配置
     const giteeUsername = "damian2021";
     const giteeToken = "b5a96c2df3774e1a8ded0ff0cc54cdfa";
     const giteeRepo = "sever666";
-    const filePath = "pointapp.txt"; // 仓库中的文件路径
+    const filePath = "1.txt"; // 仓库中的文件路径
 
     // 显示加载动画
     function showLoading() {
@@ -130,7 +145,7 @@
 
         // 解析文件内容（假设文件内容为CSV格式）
         const rows = fileContent.split('\n');
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const [name, version, releaseDate, downloadUrl] = row.split(',');
             if (name && version && releaseDate && downloadUrl) {
                 const tr = document.createElement('tr');
@@ -138,7 +153,7 @@
                     <td>${name}</td>
                     <td>${version}</td>
                     <td>${releaseDate}</td>
-                    <td><button class="download-link" onclick="window.open('${downloadUrl}')">下载</button></td>
+                    <td><a href="${downloadUrl}" target="_blank">${downloadUrl}</a></td>
                 `;
                 tableBody.appendChild(tr);
             }
@@ -147,47 +162,25 @@
         hideLoading();
     }
 
-    // 保存数据到Gitee仓库
-    async function saveDataToGitee(content) {
-        const apiUrl = `https://gitee.com/api/v5/repos/${giteeUsername}/${giteeRepo}/contents/${filePath}`;
-        const headers = {
-            Authorization: `token ${giteeToken}`,
-            "Content-Type": "application/json"
-        };
+    // 搜索功能
+    document.getElementById('searchButton').addEventListener('click', () => {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const tableBody = document.querySelector('#windowsTable tbody');
+        const rows = tableBody.querySelectorAll('tr');
 
-        // 获取文件的SHA值（用于更新文件）
-        const fileInfo = await fetch(apiUrl, { headers });
-        const fileData = await fileInfo.json();
-        const sha = fileData.sha;
-
-        // 更新文件内容
-        const body = {
-            content: btoa(unescape(encodeURIComponent(content))), // Base64编码
-            message: "更新文件内容",
-            sha: sha
-        };
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: "PUT",
-                headers: headers,
-                body: JSON.stringify(body)
-            });
-            const result = await response.json();
-            if (result.content) {
-                alert("数据保存成功！");
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const version = row.cells[1].textContent.toLowerCase();
+            if (name.includes(searchTerm) || version.includes(searchTerm)) {
+                row.style.display = '';
             } else {
-                throw new Error("保存失败");
+                row.style.display = 'none';
             }
-        } catch (error) {
-            console.error("保存失败：", error);
-            alert("保存失败，请检查网络或权限。");
-        }
-    }
+        });
+    });
 
     // 页面加载完成后加载数据
     window.onload = loadData;
 </script>
-
 </body>
 </html>

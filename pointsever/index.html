@@ -7,160 +7,73 @@
     <style>
         /* 基础样式 */
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        /* 容器样式 */
-        .container {
-            width: 100%;
-            max-width: 400px;
-            position: relative;
             overflow: hidden;
         }
 
-        /* 表单切换动画 */
-        .form-container {
-            display: flex;
-            width: 200%;
-            transition: transform 0.4s ease;
-        }
-
-        .switch-form {
-            transform: translateX(-50%);
-        }
-
-        /* 表单样式 */
-        .form-box {
-            width: 50%;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5px);
-        }
-
-        input {
+        /* 全屏登录/注册界面 */
+        .auth-page {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transform: translateX(0);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .auth-page.hide {
+            transform: translateX(-100%);
+        }
+
+        .auth-page h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .auth-page input {
+            width: 80%;
             padding: 12px;
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
+            font-size: 16px;
         }
 
-        /* 按钮样式 */
-        .btn {
-            position: relative;
-            width: 100%;
+        .auth-page button {
+            width: 80%;
             padding: 12px;
             margin: 10px 0;
-            background: #3498db;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
             border-radius: 8px;
+            font-size: 16px;
             cursor: pointer;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .auth-page button:active {
+            opacity: 0.7;
+            transform: scale(0.98);
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        /* 加载动画 */
-        .loader {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            z-index: 1001;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 自定义弹窗 */
-        .custom-alert {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            display: none;
-            z-index: 1003;
-            min-width: 250px;
-            backdrop-filter: blur(10px);
-        }
-
-        .alert-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        .success .alert-icon { color: #2ecc71; }
-        .error .alert-icon { color: #e74c3c; }
-
-        .custom-alert button {
-            margin-top: 20px;
-            padding: 10px 30px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 25px;
+        .auth-page a {
+            color: #3498db;
             cursor: pointer;
-        }
-
-        /* 人机验证弹窗 */
-        .captcha-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            width: 300px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 1002;
-            backdrop-filter: blur(10px);
-        }
-
-        .captcha-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .captcha-checkbox input {
-            width: auto;
-            margin: 0;
         }
 
         /* 主界面 */
@@ -169,6 +82,14 @@
             text-align: center;
             padding: 20px;
             width: 100%;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #main.show {
+            transform: translateY(0);
+            opacity: 1;
         }
 
         .welcome {
@@ -188,100 +109,511 @@
             margin: 15px auto;
             padding: 15px;
             font-size: 18px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
-        .notification {
-            background: #fff;
-            padding: 15px;
+        .main-btn:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+
+        .main-btn:disabled {
+            background: #ddd;
+            cursor: not-allowed;
+        }
+
+        /* 跑马灯通知 */
+        .marquee {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
             border-radius: 8px;
             margin: 15px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
         }
 
-        /* 遮罩层 */
-        .overlay {
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 10s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* 全屏个人中心页面 */
+        .profile-page {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
+            background: white;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .profile-page.show {
+            transform: translateX(0);
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #3498db;
+            transition: opacity 0.2s ease;
+        }
+
+        .back-btn:active {
+            opacity: 0.5;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .page-content {
+            padding: 15px;
+            overflow-y: auto;
+            height: calc(100vh - 60px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .collapse-btn:hover {
+            text-decoration: underline;
+        }
+
+        .collapse-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .collapse-content.show {
+            max-height: 200px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .save-btn:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            margin-top: 20px;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            margin-top: 20px;
+        }
+
+        /* 全屏排行榜页面 */
+        .rank-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .rank-page.show {
+            transform: translateX(0);
+        }
+
+        .rank-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .rank-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .rank-list {
+            padding: 15px;
+            overflow-y: auto;
+            height: calc(100vh - 60px);
+        }
+
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 全屏关于页面 */
+        .about-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .about-page.show {
+            transform: translateX(0);
+        }
+
+        .about-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .about-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 60px);
+            text-align: center;
+        }
+
+        .about-content img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+
+        .about-content h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .about-content p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* 关于按钮 */
+        .about-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .about-btn:active {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+
+        /* 弹窗样式 */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
             display: none;
-            z-index: 999;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+        }
+
+        .alert-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .success .alert-icon { color: #2ecc71; }
+        .error .alert-icon { color: #e74c3c; }
+
+        /* 系统弹窗 */
+        .system-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none;
+            z-index: 1001;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .system-alert.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .system-alert .message {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .system-alert .actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .system-alert .actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .system-alert .actions button:first-child {
+            background: #3498db;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .system-alert .actions button:last-child {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .system-alert .actions button:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
-    <!-- 加载动画 -->
-    <div class="loader" id="loader"></div>
-    
-    <!-- 遮罩层 -->
-    <div class="overlay" id="overlay"></div>
-
-    <!-- 自定义弹窗 -->
-    <div class="custom-alert" id="customAlert">
-        <div class="alert-icon">✓</div>
-        <div id="alertMessage"></div>
-        <button onclick="closeAlert()">确定</button>
+    <!-- 全屏登录界面 -->
+    <div class="auth-page" id="loginPage">
+        <h2>欢迎登录</h2>
+        <input type="text" id="loginUser" placeholder="用户名">
+        <input type="password" id="loginPass" placeholder="密码">
+        <button onclick="login(event)">登录</button>
+        <p>没有账号？ <a onclick="switchToRegister()">立即注册</a></p>
     </div>
 
-    <!-- 人机验证弹窗 -->
-    <div class="captcha-modal" id="captchaModal">
-        <h2>人机验证</h2>
-        <div class="captcha-checkbox">
-            <input type="checkbox" id="captchaCheckbox">
-            <label for="captchaCheckbox">我是人类</label>
-        </div>
-        <button class="btn" onclick="verifyCaptcha()">继续</button>
-    </div>
-
-    <!-- 登录注册容器 -->
-    <div class="container" id="authContainer">
-        <div class="form-container" id="formContainer">
-            <!-- 登录表单 -->
-            <div class="form-box" id="loginBox">
-                <h2>欢迎登录</h2>
-                <input type="text" id="loginUser" placeholder="用户名">
-                <input type="password" id="loginPass" placeholder="密码">
-                <button class="btn" onclick="showCaptcha('login')">登录</button>
-                <p>没有账号？ <a onclick="switchForm()">立即注册</a></p>
-            </div>
-
-            <!-- 注册表单 -->
-            <div class="form-box" id="registerBox">
-                <h2>用户注册</h2>
-                <input type="text" id="regUser" placeholder="用户名">
-                <input type="password" id="regPass" placeholder="密码">
-                <button class="btn" onclick="showCaptcha('register')">注册</button>
-                <p>已有账号？ <a onclick="switchForm()">立即登录</a></p>
-            </div>
-        </div>
+    <!-- 全屏注册界面 -->
+    <div class="auth-page hide" id="registerPage">
+        <h2>用户注册</h2>
+        <input type="text" id="regUser" placeholder="用户名">
+        <input type="password" id="regPass" placeholder="密码">
+        <button onclick="register(event)">注册</button>
+        <p>已有账号？ <a onclick="switchToLogin()">立即登录</a></p>
     </div>
 
     <!-- 主界面 -->
     <div id="main">
         <div class="welcome">欢迎，<span id="username"></span></div>
-        <div class="notification" onclick="showNotification()">
-            <span>📢 系统通知</span>
+        <div class="marquee">
+            <span id="marqueeText">加载通知中...</span>
         </div>
         <h2>每日签到</h2>
         <div class="points">当前积分：<span id="points">0</span></div>
-        <button class="btn main-btn" onclick="signIn(event)" id="signBtn">点击签到</button>
-        <button class="btn main-btn" onclick="location.href='profile.html'">个人中心</button>
-        <button class="btn main-btn" onclick="location.href='other.html'">其他功能</button>
+        <button class="main-btn" onclick="signIn(event)" id="signBtn">点击签到</button>
+        <button class="main-btn" onclick="showProfile()">个人中心</button>
+        <button class="main-btn" onclick="showRank()">积分排行榜</button>
+        <button class="about-btn" onclick="showAbout()">关于</button>
+    </div>
+
+    <!-- 全屏个人中心页面 -->
+    <div class="profile-page" id="profilePage">
+        <div class="page-header">
+            <button class="back-btn" onclick="closeProfile()">返回</button>
+            <div class="page-title">个人中心</div>
+        </div>
+        <div class="page-content">
+            <div class="form-group">
+                <button class="collapse-btn" onclick="toggleUsernameForm()">修改用户名</button>
+                <div class="collapse-content" id="usernameForm">
+                    <input type="text" id="newUsername" placeholder="新的用户名">
+                </div>
+            </div>
+            <div class="form-group">
+                <button class="collapse-btn" onclick="togglePasswordForm()">修改密码</button>
+                <div class="collapse-content" id="passwordForm">
+                    <input type="password" id="newPassword" placeholder="新的密码">
+                </div>
+            </div>
+            <button class="save-btn" onclick="saveChanges()">保存</button>
+            <button class="save-btn delete-btn" onclick="deleteAccount()">永久注销账号</button>
+            <button class="save-btn logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 全屏排行榜页面 -->
+    <div class="rank-page" id="rankPage">
+        <div class="page-header">
+            <button class="back-btn" onclick="closeRank()">返回</button>
+            <div class="page-title">积分排行榜</div>
+        </div>
+        <div class="page-content" id="rankList"></div>
+    </div>
+
+    <!-- 全屏关于页面 -->
+    <div class="about-page" id="aboutPage">
+        <div class="page-header">
+            <button class="back-btn" onclick="closeAbout()">返回</button>
+            <div class="page-title">关于</div>
+        </div>
+        <div class="page-content">
+            <div class="about-content">
+                <img src="https://img.picui.cn/free/2025/03/08/67cc241b3f8c6.jpeg" alt="APP Logo">
+                <h1>积分系统 Web App 1.0</h1>
+                <p>开发者: Damian2012</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div class="custom-alert" id="customAlert">
+        <div class="alert-icon">✓</div>
+        <div id="alertMessage"></div>
+    </div>
+
+    <!-- 系统弹窗 -->
+    <div class="system-alert" id="systemAlert">
+        <div class="message">你是否永久注销该账号？如果注销，你将失去所有的积分和项目。警告，这是你唯一的通行证。</div>
+        <div class="actions">
+            <button onclick="closeSystemAlert()">取消</button>
+            <button onclick="confirmDelete()">永久注销</button>
+        </div>
     </div>
 
     <script>
         const GITEE_USER = 'damian2021';
         const ACCESS_TOKEN = 'b5a96c2df3774e1a8ded0ff0cc54cdfa';
         const REPO = 'pointsever';
-        let currentUser = '';
-        let currentAction = ''; // 当前操作：login 或 register
-        let isNotificationShown = false; // 是否已显示通知
+        let currentUser = localStorage.getItem('currentUser') || '';
 
-        // 显示自定义弹窗
+        // 获取用户 IP 地址
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                console.error('获取 IP 地址失败:', error);
+                return '';
+            }
+        }
+
+        // 初始化页面
+        function init() {
+            if (currentUser) {
+                showMain();
+                loadPoints();
+                loadMarquee();
+            } else {
+                document.getElementById('loginPage').classList.remove('hide');
+            }
+        }
+
+        // 显示弹窗
         function showAlert(message, isSuccess = true) {
             const alert = document.getElementById('customAlert');
             alert.classList.remove('success', 'error');
@@ -289,77 +621,53 @@
             alert.querySelector('.alert-icon').textContent = isSuccess ? '✓' : '✕';
             document.getElementById('alertMessage').textContent = message;
             alert.style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
+            setTimeout(() => alert.classList.add('show'), 10);
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.style.display = 'none', 300);
+            }, 3000);
         }
 
-        function closeAlert() {
-            document.getElementById('customAlert').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+        // 显示系统弹窗
+        function showSystemAlert() {
+            document.getElementById('systemAlert').style.display = 'block';
+            setTimeout(() => document.getElementById('systemAlert').classList.add('show'), 10);
         }
 
-        // 显示/隐藏加载动画
-        function showLoader() {
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
+        function closeSystemAlert() {
+            document.getElementById('systemAlert').classList.remove('show');
+            setTimeout(() => document.getElementById('systemAlert').style.display = 'none', 300);
         }
 
-        function hideLoader() {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+        // 切换登录/注册界面
+        function switchToRegister() {
+            document.getElementById('loginPage').classList.add('hide');
+            document.getElementById('registerPage').classList.remove('hide');
         }
 
-        // 切换表单
-        function switchForm() {
-            document.getElementById('formContainer').classList.toggle('switch-form');
-        }
-
-        // 显示人机验证
-        function showCaptcha(action) {
-            currentAction = action;
-            document.getElementById('captchaModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
-
-        // 验证人机验证
-        function verifyCaptcha() {
-            if (!document.getElementById('captchaCheckbox').checked) {
-                showAlert('请确认您是人类', false);
-                return;
-            }
-            closeCaptcha();
-            if (currentAction === 'login') {
-                login();
-            } else {
-                register();
-            }
-        }
-
-        function closeCaptcha() {
-            document.getElementById('captchaModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+        function switchToLogin() {
+            document.getElementById('registerPage').classList.add('hide');
+            document.getElementById('loginPage').classList.remove('hide');
         }
 
         // 登录功能
-        async function login() {
-            showLoader();
+        async function login(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if (!user || !pass) {
+                showAlert('用户名和密码不能为空', false);
+                return;
+            }
+
             try {
                 const loginData = await getFileContent('login.txt');
-                const user = document.getElementById('loginUser').value.trim();
-                const pass = document.getElementById('loginPass').value.trim();
-
-                if (!user || !pass) {
-                    showAlert('用户名和密码不能为空', false);
-                    return;
-                }
-
-                if (loginData.includes(`${user}:${pass}`)) {
+                if (loginData.includes(`${user}:${pass}:`)) {
                     currentUser = user;
+                    localStorage.setItem('currentUser', currentUser); // 保存登录状态
                     showMain();
                     await loadPoints();
-                    if (!isNotificationShown) {
-                        setTimeout(() => showNotification(), 1000); // 延迟1秒显示通知
-                        isNotificationShown = true;
-                    }
                     showAlert('登录成功');
                 } else {
                     showAlert('用户名或密码错误', false);
@@ -367,95 +675,105 @@
             } catch (error) {
                 showAlert('登录失败，请检查网络连接', false);
                 console.error('登录错误:', error);
-            } finally {
-                hideLoader();
             }
         }
 
         // 注册功能
-        async function register() {
-            showLoader();
+        async function register(e) {
+            e.preventDefault();
+            const user = document.getElementById('regUser').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+
+            if (!user || !pass) {
+                showAlert('用户名和密码不能为空', false);
+                return;
+            }
+
+            if (user.includes(':') || pass.includes(':')) {
+                showAlert('用户名或密码不能包含冒号', false);
+                return;
+            }
+
             try {
-                const user = document.getElementById('regUser').value.trim();
-                const pass = document.getElementById('regPass').value.trim();
-
-                if (!user || !pass) {
-                    showAlert('用户名和密码不能为空', false);
-                    return;
-                }
-
-                if (user.includes(':') || pass.includes(':')) {
-                    showAlert('用户名或密码不能包含冒号', false);
-                    return;
-                }
-
+                const ip = await getIP();
                 const loginData = await getFileContent('login.txt').catch(() => '');
                 const users = loginData.split('\n').filter(line => line);
 
+                // 检查用户名是否已存在
                 if (users.some(line => line.startsWith(`${user}:`))) {
                     showAlert('用户名已存在', false);
                     return;
                 }
 
-                const newContent = loginData + (loginData ? '\n' : '') + `${user}:${pass}`;
+                // 检查 IP 是否已注册
+                if (users.some(line => line.endsWith(`:${ip}`))) {
+                    showAlert('每个 IP 只能注册一个账号', false);
+                    return;
+                }
+
+                const newContent = loginData + (loginData ? '\n' : '') + `${user}:${pass}:${ip}`;
                 await updateFile('login.txt', newContent);
                 showAlert('注册成功');
-                switchForm();
+                switchToLogin();
             } catch (error) {
                 showAlert('注册失败，请检查网络连接', false);
                 console.error('注册错误:', error);
-            } finally {
-                hideLoader();
             }
         }
 
         // 签到功能
         async function signIn(e) {
             e.preventDefault();
-            showLoader();
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const pointData = await getFileContent('point.txt').catch(() => '');
+            const today = new Date().toISOString().split('T')[0];
+            const pointData = await getFileContent('point.txt').catch(() => '');
 
-                if (!currentUser) {
-                    showAlert('请先登录', false);
-                    return;
-                }
-
-                if (pointData.includes(`${currentUser}:${today}`)) {
-                    showAlert('今日已签到', false);
-                    return;
-                }
-
-                const newContent = pointData + (pointData ? '\n' : '') + `${currentUser}:${today}`;
-                await updateFile('point.txt', newContent);
-                await loadPoints();
-                document.getElementById('signBtn').disabled = true;
-                showAlert('签到成功，积分+2');
-            } catch (error) {
-                showAlert('签到失败，请检查网络连接', false);
-                console.error('签到错误:', error);
-            } finally {
-                hideLoader();
+            if (!currentUser) {
+                showAlert('请先登录', false);
+                return;
             }
+
+            if (pointData.includes(`${currentUser}:`)) {
+                showAlert('今日已签到', false);
+                return;
+            }
+
+            const newContent = pointData + (pointData ? '\n' : '') + `${currentUser}:2:${today}`;
+            await updateFile('point.txt', newContent);
+            await loadPoints();
+            document.getElementById('signBtn').disabled = true;
+            showAlert('签到成功，积分+2');
         }
 
         // 加载积分
         async function loadPoints() {
             try {
                 const pointData = await getFileContent('point.txt').catch(() => '');
-                const count = pointData.split('\n').filter(line => line.startsWith(`${currentUser}:`)).length;
-                document.getElementById('points').textContent = count * 2;
+                const userPoints = pointData.split('\n')
+                    .filter(line => line.startsWith(`${currentUser}:`))
+                    .reduce((sum, line) => sum + parseInt(line.split(':')[1]), 0);
+                document.getElementById('points').textContent = userPoints;
             } catch (error) {
                 console.error('加载积分错误:', error);
             }
         }
 
+        // 加载跑马灯通知
+        async function loadMarquee() {
+            try {
+                const message = await getFileContent('message.txt').catch(() => '暂无通知');
+                document.getElementById('marqueeText').textContent = message;
+            } catch (error) {
+                console.error('加载通知错误:', error);
+            }
+        }
+
         // 显示主界面
         function showMain() {
-            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('loginPage').classList.add('hide');
+            document.getElementById('registerPage').classList.add('hide');
             document.getElementById('main').style.display = 'block';
             document.getElementById('username').textContent = currentUser;
+            setTimeout(() => document.getElementById('main').classList.add('show'), 10);
         }
 
         // 文件操作
@@ -504,30 +822,168 @@
             return response.json();
         }
 
-        // 系统通知
-        async function showNotification() {
+        // 个人中心功能
+        function showProfile() {
+            document.getElementById('profilePage').classList.add('show');
+        }
+
+        function closeProfile() {
+            document.getElementById('profilePage').classList.remove('show');
+        }
+
+        function toggleUsernameForm() {
+            const usernameForm = document.getElementById('usernameForm');
+            const passwordForm = document.getElementById('passwordForm');
+            usernameForm.classList.toggle('show');
+            passwordForm.classList.remove('show');
+        }
+
+        function togglePasswordForm() {
+            const usernameForm = document.getElementById('usernameForm');
+            const passwordForm = document.getElementById('passwordForm');
+            passwordForm.classList.toggle('show');
+            usernameForm.classList.remove('show');
+        }
+
+        async function saveChanges() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+
             try {
-                const message = await getFileContent('message.txt');
-                showAlert(`系统通知：\n${message}`);
+                const loginData = await getFileContent('login.txt');
+                const users = loginData.split('\n').filter(line => line);
+
+                // 检查新用户名是否已存在
+                if (newUsername && users.some(line => line.startsWith(`${newUsername}:`))) {
+                    showAlert('用户名已存在', false);
+                    return;
+                }
+
+                // 更新用户名
+                if (newUsername) {
+                    const updatedLoginData = users.map(line => {
+                        if (line.startsWith(`${currentUser}:`)) {
+                            return `${newUsername}:${line.split(':')[1]}:${line.split(':')[2]}`;
+                        }
+                        return line;
+                    }).join('\n');
+
+                    await updateFile('login.txt', updatedLoginData);
+                    currentUser = newUsername;
+                    localStorage.setItem('currentUser', currentUser); // 更新本地存储
+                    document.getElementById('username').textContent = newUsername;
+                    showAlert('用户名修改成功');
+                }
+
+                // 更新密码
+                if (newPassword) {
+                    const updatedLoginData = users.map(line => {
+                        if (line.startsWith(`${currentUser}:`)) {
+                            return `${currentUser}:${newPassword}:${line.split(':')[2]}`;
+                        }
+                        return line;
+                    }).join('\n');
+
+                    await updateFile('login.txt', updatedLoginData);
+                    showAlert('密码修改成功');
+                }
             } catch (error) {
-                showAlert('获取通知失败', false);
-                console.error('通知错误:', error);
+                showAlert('修改失败，请稍后重试', false);
+                console.error('修改错误:', error);
             }
         }
 
-        // 点击遮罩层关闭
-        document.getElementById('overlay').addEventListener('click', () => {
-            closeAlert();
-            closeCaptcha();
-        });
+        function logout() {
+            currentUser = '';
+            localStorage.removeItem('currentUser'); // 清除登录状态
+            document.getElementById('loginPage').classList.remove('hide');
+            document.getElementById('registerPage').classList.add('hide');
+            document.getElementById('main').style.display = 'none';
+            document.getElementById('profilePage').classList.remove('show');
+            document.getElementById('rankPage').classList.remove('show');
+            document.getElementById('aboutPage').classList.remove('show');
+            showAlert('已退出登录');
+        }
 
-        // ESC键关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAlert();
-                closeCaptcha();
+        function deleteAccount() {
+            showSystemAlert();
+        }
+
+        async function confirmDelete() {
+            closeSystemAlert();
+            try {
+                // 删除登录信息
+                const loginData = await getFileContent('login.txt');
+                const newLoginData = loginData.split('\n')
+                    .filter(line => !line.startsWith(`${currentUser}:`))
+                    .join('\n');
+                await updateFile('login.txt', newLoginData);
+
+                // 删除积分记录
+                const pointData = await getFileContent('point.txt');
+                const newPointData = pointData.split('\n')
+                    .filter(line => !line.startsWith(`${currentUser}:`))
+                    .join('\n');
+                await updateFile('point.txt', newPointData);
+
+                showAlert('账户已永久注销');
+                location.reload();
+            } catch (error) {
+                showAlert('注销失败，请稍后重试', false);
+                console.error('注销错误:', error);
             }
-        });
+        }
+
+        // 排行榜功能
+        async function showRank() {
+            try {
+                const pointData = await getFileContent('point.txt').catch(() => '');
+                const rankMap = {};
+
+                pointData.split('\n').forEach(line => {
+                    if (line) {
+                        const [user, points] = line.split(':');
+                        rankMap[user] = (rankMap[user] || 0) + parseInt(points);
+                    }
+                });
+
+                const rankList = Object.entries(rankMap)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([user, points]) => ({
+                        user,
+                        points
+                    }));
+
+                const rankHtml = rankList.map((item, index) => `
+                    <div class="rank-item">
+                        <span>${index + 1}. ${item.user}</span>
+                        <span>${item.points}分</span>
+                    </div>
+                `).join('');
+
+                document.getElementById('rankList').innerHTML = rankHtml || '<p>暂无数据</p>';
+                document.getElementById('rankPage').classList.add('show');
+            } catch (error) {
+                showAlert('获取排行榜失败', false);
+                console.error('排行榜错误:', error);
+            }
+        }
+
+        function closeRank() {
+            document.getElementById('rankPage').classList.remove('show');
+        }
+
+        // 关于页面
+        function showAbout() {
+            document.getElementById('aboutPage').classList.add('show');
+        }
+
+        function closeAbout() {
+            document.getElementById('aboutPage').classList.remove('show');
+        }
+
+        // 初始化页面
+        init();
     </script>
 </body>
 </html>

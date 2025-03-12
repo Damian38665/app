@@ -562,7 +562,7 @@
         </div>
         <div class="page-content">
             <div class="about-content">
-                <img src="https://img.picui.cn/free/2025/03/08/67cc241b3f8c6.jpeg" alt="APP Logo">
+                <img src="https://via.placeholder.com/100" alt="APP Logo">
                 <h1>积分系统 Web App 1.0</h1>
                 <p>开发者: Damian2012</p>
             </div>
@@ -724,7 +724,7 @@
         // 签到功能
         async function signIn(e) {
             e.preventDefault();
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0]; // 获取当前日期
             const pointData = await getFileContent('point.txt').catch(() => '');
 
             if (!currentUser) {
@@ -732,7 +732,11 @@
                 return;
             }
 
-            if (pointData.includes(`${currentUser}:`)) {
+            // 检查用户是否已经签到过
+            const userPoints = pointData.split('\n').filter(line => line.startsWith(`${currentUser}:`));
+            const lastSignInDate = userPoints[userPoints.length - 1]?.split(':')[2]; // 获取最后一次签到日期
+
+            if (lastSignInDate === today) {
                 showAlert('今日已签到', false);
                 return;
             }

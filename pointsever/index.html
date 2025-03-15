@@ -15,6 +15,17 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* 移除安卓点击高光 */
+        }
+
+        /* 移除所有交互元素的默认高光 */
+        button,
+        input,
+        textarea,
+        a {
+            outline: none; /* 移除点击时的蓝色边框 */
+            user-select: none; /* 禁止文本选中 */
+            -webkit-tap-highlight-color: transparent; /* 移除安卓点击高光 */
         }
 
         /* 全屏登录/注册界面 */

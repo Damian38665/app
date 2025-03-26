@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 网页标题，会显示在浏览器标签页和搜索引擎结果中 -->
+    <title>文本加密和解密系统 - 安全便捷的文本处理</title>
+    <!-- 网页描述，会显示在搜索引擎结果中，帮助用户了解网页内容 -->
+    <meta name="description" content="这是一个文本加密和解密系统，用户可以输入文本和自定义密码进行加密和解密操作，安全便捷。">
+    <!-- 关键词，帮助搜索引擎识别网页的主题 -->
+    <meta name="keywords" content="文本加密, 文本解密, 加密系统, 解密系统, 自定义密码">
+    <!-- 作者信息 -->
+    <meta name="author" content="Damian2012">
+    <!-- 网页语言 -->
+    <meta http-equiv="Content-Language" content="zh-CN">
+    <!-- 机器人指令，告诉搜索引擎可以索引该页面并跟随页面上的链接 -->
+    <meta name="robots" content="index, follow">
+
+    <style>
+        /* 全局样式，去除点击高亮颜色 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+        .developer-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .option-buttons {
+            margin-bottom: 20px;
+        }
+
+        .option-buttons button {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+            outline: none;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+        }
+
+        .option-buttons button.active {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .option-buttons button:hover {
+            background-color: #ccc;
+        }
+
+        .option-buttons button.active:hover {
+            background-color: #0056b3;
+        }
+
+        .section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 10px;
+            width: 350px;
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #007BFF;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            outline: none;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+        }
+
+        button:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #007BFF;
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            animation: spin 1s linear infinite;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .copy-button {
+            margin-top: 5px;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+        .copy-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="developer-info">开发者：Damian2012</div>
+    <h1>文本加密和解密系统</h1>
+    <div class="option-buttons">
+        <button onclick="showSection('encryption')">加密</button>
+        <button onclick="showSection('decryption')">解密</button>
+    </div>
+    <div class="section" id="encryption">
+        <h2>加密</h2>
+        <label for="plaintext">输入要加密的文本:</label>
+        <input type="text" id="plaintext" placeholder="输入文本">
+        <label for="encryptionPassword">输入加密密码:</label>
+        <input type="text" id="encryptionPassword" placeholder="输入密码">
+        <button onclick="encryptText()">加密
+            <div class="loading" id="encryptionLoading"></div>
+        </button>
+        <p id="encryptedResult"></p>
+        <button class="copy-button" onclick="copyText('encryptedResult')">复制加密文本</button>
+    </div>
+    <div class="section" id="decryption">
+        <h2>解密</h2>
+        <label for="ciphertext">输入要解密的文本:</label>
+        <input type="text" id="ciphertext" placeholder="输入加密文本">
+        <label for="decryptionPassword">输入解密密码:</label>
+        <input type="text" id="decryptionPassword" placeholder="输入密码">
+        <button onclick="decryptText()">解密
+            <div class="loading" id="decryptionLoading"></div>
+        </button>
+        <p id="decryptedResult"></p>
+        <button class="copy-button" onclick="copyText('decryptedResult')">复制解密文本</button>
+    </div>
+    <div class="copy-banner" id="copy-banner"></div>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            const buttons = document.querySelectorAll('.option-buttons button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`.option-buttons button[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        }
+
+        function showLoading(loadingElementId) {
+            document.getElementById(loadingElementId).style.display = 'inline-block';
+        }
+
+        function hideLoading(loadingElementId) {
+            document.getElementById(loadingElementId).style.display = 'none';
+        }
+
+        function encryptText() {
+            showLoading('encryptionLoading');
+            setTimeout(() => {
+                const plaintext = document.getElementById('plaintext').value;
+                const password = document.getElementById('encryptionPassword').value;
+                let encrypted = '';
+                for (let i = 0; i < plaintext.length; i++) {
+                    encrypted += String.fromCharCode(plaintext.charCodeAt(i) + password.charCodeAt(i % password.length));
+                }
+                const encryptedResult = '加密结果:\n' + btoa(encrypted);
+                document.getElementById('encryptedResult').textContent = encryptedResult;
+                hideLoading('encryptionLoading');
+            }, 1000);
+        }
+
+        function decryptText() {
+            showLoading('decryptionLoading');
+            setTimeout(() => {
+                const ciphertext = atob(document.getElementById('ciphertext').value);
+                const password = document.getElementById('decryptionPassword').value;
+                let decrypted = '';
+                for (let i = 0; i < ciphertext.length; i++) {
+                    decrypted += String.fromCharCode(ciphertext.charCodeAt(i) - password.charCodeAt(i % password.length));
+                }
+                const decryptedResult = '解密结果:\n' + decrypted;
+                document.getElementById('decryptedResult').textContent = decryptedResult;
+                hideLoading('decryptionLoading');
+            }, 1000);
+        }
+
+        function copyText(elementId) {
+            const textElement = document.getElementById(elementId);
+            const textToCopy = textElement.textContent.split('\n').slice(1).join('\n');
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (err) {
+                success = false;
+            }
+            document.body.removeChild(textArea);
+
+            const banner = document.getElementById('copy-banner');
+            if (success) {
+                banner.textContent = '文本已复制到剪贴板';
+            } else {
+                banner.textContent = '复制失败，请手动复制';
+            }
+            banner.style.opacity = 1;
+            setTimeout(() => {
+                banner.style.opacity = 0;
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>    

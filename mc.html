@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MC服务器管理系统</title>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --error-color: #FF3B30;
+            --success-color: #34C759;
+            --bg-color: #F2F2F7;
+            --card-color: #FFFFFF;
+            --text-primary: #1C1C1E;
+            --text-secondary: #8E8E93;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            min-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            margin: 10px 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 28px;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #C7C7CC;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.2s;
+            appearance: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .btn-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 30px;
+            border: 4px solid rgba(0, 122, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #F1F1F1;
+        }
+
+        .info-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .days-count {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .custom-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .alert-box {
+            background: white;
+            width: 100%;
+            max-width: 280px;
+            border-radius: 14px;
+            overflow: hidden;
+            animation: alertEnter 0.3s ease-out;
+        }
+
+        @keyframes alertEnter {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .alert-header {
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .alert-error .alert-header {
+            color: var(--error-color);
+        }
+
+        .alert-body {
+            padding: 20px;
+            text-align: center;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .alert-footer {
+            display: flex;
+            border-top: 1px solid #F1F1F1;
+        }
+
+        .alert-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .page {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: absolute;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateY(0);
+            position: relative;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 登录页面 -->
+        <div class="card page active" id="loginPage">
+            <h2>服务器管理系统</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" class="input-field" placeholder="请输入用户名" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" class="input-field" placeholder="请输入密码" required>
+                </div>
+                <div class="btn-container">
+                    <button type="submit" class="login-btn" id="loginBtn">登录</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 加载页面 -->
+        <div class="card page" id="loadingPage">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">正在连接服务器...</div>
+            </div>
+        </div>
+
+        <!-- 信息页面 -->
+        <div class="card page" id="infoPage">
+            <h2>欢迎回来！</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <span class="info-label">管理域名</span>
+                    <span class="info-value">mcclub.2m.pub</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">创建日期</span>
+                    <span class="info-value">2025/01/05</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">到期日期</span>
+                    <span class="info-value">2025/05/21</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">剩余天数</span>
+                    <span class="info-value days-count" id="daysCount">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">服务器域名</span>
+                    <span class="info-value">om.rainplay.cn</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">服务器端口</span>
+                    <span class="info-value">51757</span>
+                </div>
+            </div>
+            <div class="btn-container" style="margin-top: 30px;">
+                <button class="login-btn" id="logoutBtn">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div class="custom-alert" id="customAlert">
+        <div class="alert-box" id="alertBox">
+            <div class="alert-header" id="alertHeader">提示</div>
+            <div class="alert-body" id="alertBody">这里是提示内容</div>
+            <div class="alert-footer">
+                <button class="alert-btn" id="alertConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面元素
+        const loginPage = document.getElementById('loginPage');
+        const loadingPage = document.getElementById('loadingPage');
+        const infoPage = document.getElementById('infoPage');
+        const loginForm = document.getElementById('loginForm');
+        const daysCount = document.getElementById('daysCount');
+        const loadingText = document.getElementById('loadingText');
+        const customAlert = document.getElementById('customAlert');
+
+        // 初始化函数
+        function init() {
+            // 绑定事件监听器
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', createRipple);
+            });
+
+            loginForm.addEventListener('submit', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('alertConfirm').addEventListener('click', hideAlert);
+            customAlert.addEventListener('click', (e) => e.target === customAlert && hideAlert());
+        }
+
+        // 波纹动画
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const circle = document.createElement("span");
+            const rect = button.getBoundingClientRect();
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - rect.left - radius}px`;
+            circle.style.top = `${event.clientY - rect.top - radius}px`;
+            circle.classList.add("ripple");
+
+            button.appendChild(circle);
+            setTimeout(() => circle.remove(), 600);
+        }
+
+        // 登录处理
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'admin' && password === '1334998') {
+                await switchPage(loginPage, loadingPage);
+                showRandomLoadingMessage();
+                setTimeout(async () => {
+                    await switchPage(loadingPage, infoPage);
+                    updateDaysCount();
+                }, 1500 + Math.random() * 1500);
+            } else {
+                showAlert('error', '登录失败', username === 'admin' ? '密码错误' : '用户名错误');
+            }
+        }
+
+        // 退出登录
+        async function handleLogout() {
+            await switchPage(infoPage, loginPage);
+            document.getElementById('password').value = '';
+        }
+
+        // 页面切换
+        async function switchPage(from, to) {
+            from.classList.remove('active');
+            await new Promise(r => setTimeout(r, 500));
+            to.classList.add('active');
+        }
+
+        // 显示随机加载信息
+        function showRandomLoadingMessage() {
+            const messages = [
+                "正在验证身份信息...",
+                "连接服务器中...",
+                "加载用户配置...",
+                "初始化数据库...",
+                "检查系统更新...",
+                "准备用户界面...",
+                "加载安全模块...",
+                "验证许可证..."
+            ];
+            loadingText.textContent = messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        // 更新剩余天数
+        function updateDaysCount() {
+            const expireDate = new Date('2025-05-21');
+            const timeDiff = expireDate - Date.now();
+            const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            daysCount.textContent = `${days}天`;
+            daysCount.style.color = days < 7 ? 'var(--error-color)' : 'var(--primary-color)';
+        }
+
+        // 弹窗控制
+        function showAlert(type, title, message) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert-box alert-${type}`;
+            document.getElementById('alertHeader').textContent = title;
+            document.getElementById('alertBody').textContent = message;
+            customAlert.style.display = 'flex';
+            setTimeout(() => customAlert.style.opacity = '1', 10);
+        }
+
+        function hideAlert() {
+            customAlert.style.opacity = '0';
+            setTimeout(() => customAlert.style.display = 'none', 300);
+        }
+
+        // 初始化应用
+        init();
+    </script>
+</body>
+</html>

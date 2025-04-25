@@ -2,287 +2,296 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>MC服务器信息</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MC服务器接入系统</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         body {
             min-height: 100vh;
+            background: #f8f9fa;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #333;
-            background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96c93d);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .content {
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        h1 {
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .protocol-iframe {
-            width: 100%;
-            height: 60vh;
-            border: none;
-            border-radius: 10px;
-            margin: 20px 0;
-            background: white;
-        }
-
-        .timer {
-            margin: 15px 0;
-            font-size: 1.1em;
-            color: #fff;
-        }
-
-        /* 按钮样式 */
-        .continue-btn {
-            position: relative;
-            background: #3498db;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.1em;
-            cursor: pointer;
             overflow: hidden;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .continue-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
+        /* 页面容器 */
+        .page-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .continue-btn:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 扩散效果 */
-        .continue-btn:not(:disabled)::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%, -50%);
-            transform-origin: 50% 50%;
-        }
-
-        .continue-btn:not(:disabled):focus::after {
-            animation: ripple 1s ease-out;
-        }
-
-        @keyframes ripple {
-            0% {
-                transform: scale(0, 0);
-                opacity: 0.5;
-            }
-            100% {
-                transform: scale(20, 20);
-                opacity: 0;
-            }
-        }
-
-        /* 首页样式 */
-        .server-address {
-            font-size: 1.5em;
-            margin: 20px 0;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 5px;
-            display: inline-block;
-            color: #2c3e50;
-        }
-
-        .copy-btn {
-            background: #2ecc71;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 20px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 10px 5px;
-        }
-
-        .copy-btn:hover {
-            background: #27ae60;
-            transform: translateY(-2px);
-        }
-
-        .version-info {
-            color: #fff;
-            margin: 15px 0;
-            font-size: 1.1em;
-        }
-
-        /* 提示框样式 */
-        .alert-box {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 25px;
-            border-radius: 25px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            font-size: 14px;
-            opacity: 0;
-            transition: all 0.3s;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .alert-box.show {
-            opacity: 1;
-            top: 30px;
-        }
-
-        /* 页面切换 */
+        /* 页面通用样式 */
         .page {
-            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
+        }
+
+        /* iOS风格页面切换 */
+        .page:not(.active) {
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
         }
 
         .page.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* 欢迎页面 */
+        .welcome-page {
+            text-align: center;
+        }
+
+        .welcome-page h1 {
+            font-size: 28px;
+            color: #1c1c1e;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        /* 协议页面 */
+        .protocol-page {
+            background: #ffffff;
+        }
+
+        .protocol-page iframe {
+            width: 100%;
+            height: 65vh;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        /* 按钮样式 */
+        .ios-btn {
+            width: 100%;
+            max-width: 300px;
+            background: #007aff;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ios-btn:active {
+            background: #0062cc;
+        }
+
+        .ios-btn:disabled {
+            background: #a7c7ff;
+            cursor: not-allowed;
+        }
+
+        /* 进度条容器 */
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+            margin: 25px 0;
+        }
+
+        .progress-text {
+            color: #8e8e93;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e5e5ea;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0;
+            height: 100%;
+            background: #007aff;
+            transition: width 1s linear;
+        }
+
+        /* 服务器信息页面 */
+        .server-page {
+            background: #ffffff;
+            text-align: center;
+        }
+
+        .server-page h2 {
+            font-size: 22px;
+            color: #1c1c1e;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .server-address {
+            font-size: 18px;
+            background: #f2f2f7;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #007aff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .server-address:active {
+            background: #e5e5ea;
+        }
+
+        .server-address .hint {
+            display: block;
+            font-size: 13px;
+            color: #8e8e93;
+            margin-top: 8px;
+        }
+
+        .server-info {
+            color: #8e8e93;
+            margin: 25px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* iOS风格通知 */
+        .ios-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .ios-alert.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
 <body>
-    <div class="content">
-        <!-- 协议页面 -->
-        <div class="page active" id="protocolPage">
-            <h1>用户协议</h1>
-            <iframe src="https://damian38665.github.io/learn/mc" class="protocol-iframe"></iframe>
-            <div class="timer" id="timer">请仔细阅读协议（剩余时间：20秒）</div>
-            <button class="continue-btn" id="continueBtn" disabled>
-                同意并继续
-            </button>
+    <div class="page-container">
+        <!-- 欢迎页面 -->
+        <div class="page active welcome-page">
+            <h1>欢迎加入原始生存服务器</h1>
+            <button class="ios-btn" onclick="nextPage('.protocol-page')">查看协议</button>
         </div>
 
-        <!-- 首页 -->
-        <div class="page" id="homePage">
-            <h1>服务器信息</h1>
-            <div class="server-address" id="serverAddress">mcclub.2m.pub</div>
-            <div>
-                <button class="copy-btn" onclick="copyAddress()">复制地址</button>
-                <button class="copy-btn" onclick="selectAddress()">选择地址</button>
+        <!-- 协议页面 -->
+        <div class="page protocol-page">
+            <iframe src="https://damian38665.github.io/learn/mc"></iframe>
+            <div class="progress-container">
+                <div class="progress-text" id="progressText">请仔细阅读协议（剩余20秒）</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
             </div>
-            <div class="version-info">
-                <p>版本: Java版 1.20.1</p>
-                <p>模式: 原始生存(无模组)</p>
+            <button class="ios-btn" id="confirmBtn" disabled>同意并继续</button>
+        </div>
+
+        <!-- 服务器信息页面 -->
+        <div class="page server-page">
+            <h2>服务器信息</h2>
+            <div class="server-address" onclick="copyAddress()">
+                mcclub.2m.pub
+                <span class="hint">点击复制地址</span>
             </div>
+            <div class="server-info">
+                <p>版本：Java 1.20.1</p>
+                <p>模式：原始生存（无模组）</p>
+            </div>
+            <button class="ios-btn" onclick="showAlert('祝您游戏愉快！')">开始游戏</button>
         </div>
     </div>
 
-    <!-- 自定义提示框 -->
-    <div class="alert-box" id="alertBox"></div>
+    <!-- iOS风格通知 -->
+    <div class="ios-alert" id="alert"></div>
 
     <script>
-        // 倒计时功能
+        // 页面切换系统
+        let currentPage = '.welcome-page';
+        function nextPage(target) {
+            document.querySelector(currentPage).classList.remove('active');
+            document.querySelector(target).classList.add('active');
+            currentPage = target;
+        }
+
+        // 协议倒计时系统
         let seconds = 20;
-        const timerInterval = setInterval(() => {
-            document.getElementById('timer').textContent = `请仔细阅读协议（剩余时间：${seconds}秒）`;
-            if (seconds <= 0) {
-                document.getElementById('continueBtn').disabled = false;
-                clearInterval(timerInterval);
+        const timer = setInterval(() => {
+            const progress = (1 - seconds/20) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `请仔细阅读协议（剩余${seconds}秒）`;
+            
+            if(seconds <= 0) {
+                document.getElementById('confirmBtn').disabled = false;
+                clearInterval(timer);
             }
             seconds--;
         }, 1000);
 
-        // 页面切换
-        document.getElementById('continueBtn').addEventListener('click', () => {
-            document.getElementById('protocolPage').classList.remove('active');
-            document.getElementById('homePage').classList.add('active');
+        // 确认协议
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            nextPage('.server-page');
+            showAlert('✓ 协议确认成功');
         });
 
         // 复制功能
         function copyAddress() {
-            const address = document.getElementById('serverAddress').textContent;
-            
-            // 现代剪贴板API
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(address).then(() => {
-                    showAlert('✓ 地址已复制到剪贴板');
-                }).catch(() => {
-                    fallbackCopy(address);
-                });
-            } else {
-                fallbackCopy(address);
-            }
+            const text = 'mcclub.2m.pub';
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('✓ 地址已复制');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showAlert('✓ 地址已复制');
+            });
         }
 
-        // 备用复制方法
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                showAlert(successful ? '✓ 地址已复制' : '⚠ 复制失败');
-            } catch (err) {
-                showAlert('⚠ 复制失败');
-            }
-            
-            document.body.removeChild(textarea);
-        }
-
-        // 选择地址
-        function selectAddress() {
-            const range = document.createRange();
-            range.selectNode(document.getElementById('serverAddress'));
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-            showAlert('地址已选中，请按Ctrl+C复制');
-        }
-
-        // 自定义提示框
+        // iOS风格通知
         function showAlert(text) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.textContent = text;
-            alertBox.classList.add('show');
-            setTimeout(() => {
-                alertBox.classList.remove('show');
-            }, 2000);
+            const alert = document.getElementById('alert');
+            alert.textContent = text;
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 2000);
         }
     </script>
 </body>

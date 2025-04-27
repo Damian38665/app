@@ -5,6 +5,17 @@
     <title>MC服务器地址获取</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* 新增的修复代码 */
+        button, [type="button"] {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 原有样式 */
         * {
             margin: 0;
             padding: 0;
@@ -18,7 +29,6 @@
             overflow: hidden;
         }
 
-        /* 全屏页面 */
         .page {
             position: fixed;
             top: 0;
@@ -40,7 +50,6 @@
             to { opacity: 1; }
         }
 
-        /* 导航栏 */
         .nav-bar {
             position: sticky;
             top: 0;
@@ -60,7 +69,6 @@
             margin-left: 15px;
         }
 
-        /* iOS风格返回按钮 */
         .back-btn {
             width: 30px;
             height: 30px;
@@ -82,14 +90,12 @@
             top: 8px;
         }
 
-        /* 内容区域 */
         .content {
             padding: 20px;
             max-width: 800px;
             margin: 0 auto;
         }
 
-        /* 长方形按钮 */
         .rect-btn {
             display: block;
             width: 100%;
@@ -114,7 +120,6 @@
             cursor: not-allowed;
         }
 
-        /* 协议iframe */
         .protocol-iframe {
             width: 100%;
             height: 60vh;
@@ -124,7 +129,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        /* 进度条 */
         .progress-container {
             margin: 25px 0;
         }
@@ -149,7 +153,6 @@
             transition: width 1s linear;
         }
 
-        /* 服务器信息 */
         .server-address {
             font-size: 1.3em;
             background: rgba(118,118,128,0.12);
@@ -167,7 +170,6 @@
             background: rgba(118,118,128,0.2);
         }
 
-        /* iOS风格半透明弹窗 */
         .ios-modal {
             position: fixed;
             top: 0;
@@ -228,7 +230,6 @@
             font-weight: 600;
         }
 
-        /* 提示系统 */
         .toast {
             position: fixed;
             top: 50px;
@@ -250,7 +251,7 @@
     </style>
 </head>
 <body>
-    <!-- 欢迎页面 -->
+    <!-- 页面内容保持不变 -->
     <div class="page active welcome-page">
         <div class="nav-bar">
             <div class="nav-title">MC服务器地址获取</div>
@@ -261,7 +262,6 @@
         </div>
     </div>
 
-    <!-- 协议页面 -->
     <div class="page protocol-page">
         <div class="nav-bar">
             <button class="back-btn" onclick="showBackConfirm()"></button>
@@ -279,7 +279,6 @@
         </div>
     </div>
 
-    <!-- 服务器信息页面 -->
     <div class="page server-page">
         <div class="nav-bar">
             <button class="back-btn" onclick="switchPage('protocol')"></button>
@@ -295,7 +294,6 @@
         </div>
     </div>
 
-    <!-- iOS风格弹窗 -->
     <div class="ios-modal" id="iosModal">
         <div class="ios-modal-content">
             <div class="ios-modal-body">
@@ -308,11 +306,10 @@
         </div>
     </div>
 
-    <!-- 提示框 -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // 页面管理系统
+        // JavaScript部分保持不变
         let currentPage = 'welcome';
         function switchPage(target) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -320,7 +317,6 @@
             currentPage = target;
         }
 
-        // 倒计时系统
         let seconds = 20;
         let timer;
         function startTimer() {
@@ -338,7 +334,6 @@
         }
         startTimer();
 
-        // 弹窗控制
         function showBackConfirm() {
             document.getElementById('iosModal').style.display = 'flex';
         }
@@ -358,13 +353,11 @@
             closeModal();
         }
 
-        // 功能按钮
         document.getElementById('confirmBtn').addEventListener('click', () => {
             switchPage('server');
             showToast('✔ 协议确认成功');
         });
 
-        // 复制功能
         function copyAddress() {
             const text = 'mcclub.2m.pub';
             navigator.clipboard.writeText(text).then(() => {
@@ -380,7 +373,6 @@
             });
         }
 
-        // 提示系统
         function showToast(text) {
             const toast = document.getElementById('toast');
             toast.textContent = text;
